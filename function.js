@@ -1,224 +1,145 @@
-function lafuncion(lista) {
-const checkedBoxes = document.querySelectorAll('#tablamaterias input[type="checkbox"]:checked');
-
-// Extraer los valores en un array
-const materias = Array.from(checkedBoxes).map(checkbox => checkbox.value);
-//console.log(materias);
-const horarios=Array.from(checkedBoxes).map(checkbox => {
-  const index = parseInt(checkbox.value); // Convert checkbox value to number
-return lista[index]});
-//crear la matriz de colisiones
-const matriz=new Array(materias.length);
-for(let i = 0; i < materias.length; i++){
-	ii=materias[i];
-	matriz[i]=[];
-	for(let j = 0; j < materias.length; j++){
-		if(i==j){matriz[i][j]=0;continue;}
-		jj=materias[j];
-		horarioi=lista[ii];
-		horarioj=lista[jj];
-		codigoi=document.getElementById("materia"+ii).dataset.codigo;
-		codigoj=document.getElementById("materia"+jj).dataset.codigo;
-		matriz[i][j]=comparahorarios(horarioi,horarioj,codigoi,codigoj);
-	}
-}
-//crear toda la informacion final
-
-//agregar el titulo de las tablas
-codigomaterias=Array.from(checkedBoxes).map(checkbox => checkbox.dataset.codigo);
-//console.log(codigomaterias);
-horariosvarios=combinaciones(matriz);
-matriz.unshift(codigomaterias)
-filterCheckedRows("tablamaterias")
-const tablaDeCombinaciones= arrayATabla(matriz,"deducciones");
-const rows = tablaDeCombinaciones.querySelectorAll('tr');
-for (let i = 0; i < rows.length; i++) {
-	const row = rows[i];
-	const valuey=document.createElement('th')
-	valuey.textContent=(i === 0 ? '' : codigomaterias[i-1]);
-	row.insertBefore(valuey, row.firstChild);
-}//respuesta
-let options = {
-  originalTableId: 'tablamaterias',  // Copy styles from this table
-  includeHeader: true,             // Include the header row
-  newTableId: ''     // Set new table ID
-};
-let tablass=horariosvarios.map(value=>createTableFromRowIds(value,materias,options));
-//console.log(tablass);
-deducciones=document.getElementById('deducciones');
-deducciones.innerHTML="";
-titulo=document.createElement('h1');
-titulo.innerHTML='tabla de choque (-1: misma materia distinta seccion,0:las puedes ver juntas, sino chocan una o mas veces y no la deberias ver)'
-deducciones.appendChild(titulo);
-deducciones.appendChild(tablaDeCombinaciones);
-for (i of tablass){//console.log(i);
-deducciones.appendChild(i);}
-//console.log('horariosvarios',horariosvarios);
-//console.log("Valores seleccionados:", horarios);
-//console.log(matriz)
-}
-function comparahorarios(horario1, horario2,codigo1,codigo2){
-	//console.log(horario1,horario2)
-	if(codigo1==codigo2){return -1;};
-	let contador =0;
-	for (let i of horario1){
-		for(let j of horario2){
-			//console.log(i,j)
-			if(i[0]==j[0]&&i[1]==j[1]){contador++;}
+function lafuncion() {
+const listaGrande= document.getElementById("tablamaterias");
+const collectionList=listaGrande.getElementsByClassName("row");
+//formato de elementos en array:
+//codigo,[[diahora],[diahora],[diahora]]
+let horarioLista=[]
+let longitud=collectionList.length;
+for (let i = 0; i < longitud; i++){
+	iterador=collectionList[i];
+	UseCheckbox=iterador.getElementsByTagName("input");
+	if(UseCheckbox[0].checked){
+		codigo=iterador.getElementsByClassName('codigo')[0].innerText;
+		horario=[];
+		diaRaw=Array.from(iterador.getElementsByClassName('dia'));
+		horaRaw=Array.from(iterador.getElementsByClassName('hora'));
+		for(let j=0;j<diaRaw.length;j++){
+			iteradorDos=diaRaw[j].innerText;
+			iteradorTres=horaRaw[j].innerText;
+			if(iteradorDos!=""){horario.push([iteradorDos,iteradorTres]);}
 		}
-	}
-	return contador;
-}
-
-function interseccion(segmento1,segmento2){
-	if(segmento1[0]>segmento2[1]||segmento1[1]<segmento2[0]){
-		return true;
+		horarioLista.push([codigo,horario,iterador]);
+		//console.log(codigo,horario);//listaHora
 	}
 	else{
-		return false;
+		iterador.style.display = 'none';
+	}
+	//console.log(horarioLista[i]);
+}
+let otraLongitud=horarioLista.length+1;
+//console.log(horarioLista);
+let matrizHorario=[];
+for (let i = 0; i < otraLongitud; i++){
+	let filaMatriz=[];
+	for (let j = 0; j < otraLongitud; j++){
+		//titulo
+		if(i==0&&j==0){filaMatriz.push(['','th']);continue;}
+		let a=i+j-1;
+		let b=horarioLista[a];
+		if(i==0||j==0){filaMatriz.push([b[0],'th']);continue;}
+		//numero
+		if(i==j){filaMatriz.push([0,'td']);continue;}
+		let materia1=horarioLista[i-1];
+		let materia2=horarioLista[j-1];
+		let codigo1=materia1[0];
+		let codigo2=materia2[0];
+		if(codigo1==codigo2){filaMatriz.push([-1,'td']);continue;}
+		let horario1=materia1[1];
+		let horario2=materia2[1];
+		let numeroChoques=0;
+for (let i1 = 0; i1 < horario1.length; i1++){
+	for (let j1 = 0; j1 < horario2.length; j1++){
+		//console.log(horario1[i1],horario2[j1]);
+		if(horario1[i1][0]==horario2[j1][0]&&horario1[i1][1]==horario2[j1][1]){//console.log(horario1[i1])
+			numeroChoques=numeroChoques+1;}
 	}
 }
-
-function arrayATabla(tabla,idtag){
-	//document.getElementById(idtag)
-	tablanueva= document.createElement('table');
-	tabla.forEach((rowData, rowIndex) => {
-    const row = document.createElement('tr')
-	rowData.forEach((cellData) => {
-      const cell = document.createElement(rowIndex === 0 ? 'th' : 'td');
-      cell.textContent = cellData;
-      row.appendChild(cell);
-    });
-	tablanueva.appendChild(row);
-  });
-  //container=document.getElementById(idtag);
-  //container.innerHTML="";
-  //container.appendChild(tablanueva);
-  return tablanueva;
+		filaMatriz.push([numeroChoques,'td']);
+	}
+	matrizHorario.push(filaMatriz);
 }
-
-function filterCheckedRows(tableId) {
-  // Get the table element
-  const table = document.getElementById(tableId);
-  
-  // Get all rows in the table (skipping the header if present)
-  const rows = table.querySelectorAll('tr');
-  
-  // Loop through all rows (start from 1 to skip header if needed)
-  for (let i = 1; i < rows.length; i++) {
-    const row = rows[i];
-    // Find the checkbox in the row
-    const checkbox = row.querySelector('input[type="checkbox"]');
-    
-    // If checkbox exists and is not checked, hide the row
-    if (checkbox && !checkbox.checked) {
-      row.style.display = 'none';
-    } else {
-      row.style.display = ''; // Show the row if checked or no checkbox
-    }
-  }
+//crear html de la matriz horario
+let matrizConclusiones= document.getElementById('matrixhorarios');
+matrizConclusiones.innerText='';
+for (let i = 0; i < matrizHorario.length; i++){
+	let fila=document.createElement('tr');
+	for (let j = 0; j < matrizHorario.length; j++){
+		let aaa=matrizHorario[i][j];
+		let texto=document.createTextNode(aaa[0]);
+		let elemento= document.createElement(aaa[1]);
+		elemento.appendChild(texto);
+		fila.appendChild(elemento);
+	}
+	matrizConclusiones.appendChild(fila);
 }
-
-function combinaciones(matriz){
-	let listafinal=[];
-	let listainicial=[];
-	let listasig=[];
-	listainicial=matriz.map((value,index)=>[index]);
-	listabase=listainicial;
-	let matriceschange=true;
-	while(matriceschange){
-		for(i of listainicial){
-			for (j in listabase){
-			//console.log(i,j);
-				if(j>i[i.length-1]){
-					let choques=i.map((value)=>matriz[j][value]);
-					let sumachoque=0;
-					choques.forEach((value)=>sumachoque+=value);
-					if(!sumachoque){
-						
-						listasig.push([...i,...[parseInt(j)]]);
-					}
-					/*console.log("i",i);
-					console.log('j',j);
-					console.log('choques',choques);
-					console.log('sumachoque',sumachoque);
-					*/
-				}
-			}
-			
-		}
+letdivdeducciones=document.getElementById('deducciones');
+letdivdeducciones.appendChild(matrizConclusiones);
+//hacer la matriz para usar
+matrizHorarioReducida=[];
+for (let i = 1; i < matrizHorario.length; i++){filareducida=[];
+	for (let j = 1; j < matrizHorario.length; j++){filareducida.push(matrizHorario[i][j][0]);
+	}matrizHorarioReducida.push(filareducida);}
+//console.log(matrizHorarioReducida);
+//hacer cada lista
+let lista1=[];
+let lista2=[];
+let lista3=[];
+//console.log('lista2 antes de todo',lista2)
+//nuevo>>lista1>lista2>lista3>>viejo
+for (let i = 0; i < matrizHorarioReducida.length; i++){
+	lista2.push([i]);
+}
+//console.log('lista2',JSON.stringify(lista2))
+console.log('inicio: lista1 ',JSON.stringify(lista1), 'lista2 ',JSON.stringify(lista2), 'lista3 ',JSON.stringify(lista3));
+while(lista2.length>0){console.log('i')
+	for (let iteraHorariosLista2 = 0; iteraHorariosLista2 < lista2.length; iteraHorariosLista2++){ 
+		let horarioEnLista2=lista2[iteraHorariosLista2];
+		let ultimoElementoEnLaLista=horarioEnLista2[horarioEnLista2.length - 1]
+		let opcionesMateriasParaAgregarAHorario=[]
+		for(let i=ultimoElementoEnLaLista+1;i<matrizHorarioReducida.length;i++){opcionesMateriasParaAgregarAHorario.push(i)}
 		
-		listafinal=[...listafinal,...listainicial];
-		listainicial=listasig;
-		listasig=[];
-		//console.log('listafinal',listafinal,'listainicial',listainicial,
-		//			'listasig',listasig);
-	if(listainicial.length==0){matriceschange=false;}
+		console.log('inicio de ciclo')
+		console.log('horarioEnLista2',JSON.stringify(horarioEnLista2), 'ultimoElementoEnLaLista',ultimoElementoEnLaLista, 'opcionesMateriasParaAgregarAHorario',JSON.stringify(opcionesMateriasParaAgregarAHorario))
+		for(let iteradorPretendienteHorario=0;iteradorPretendienteHorario<opcionesMateriasParaAgregarAHorario.length;iteradorPretendienteHorario++){
+			pretendienteHorario=opcionesMateriasParaAgregarAHorario[iteradorPretendienteHorario]
+			listaDeChoques=[]
+			for(let iteradorElementosEnLaLista=0;iteradorElementosEnLaLista<horarioEnLista2.length;iteradorElementosEnLaLista++){
+				let ElementosEnLaLista=horarioEnLista2[iteradorElementosEnLaLista];
+				listaDeChoques.push(matrizHorarioReducida[pretendienteHorario][ElementosEnLaLista])
+			}
+			let condicionDeChoque=true
+			for(i=0;i<listaDeChoques.length;i++){
+				if(listaDeChoques[i]!=0){condicionDeChoque=false}
+			}
+			if(condicionDeChoque){
+				horarioPretendienteCompleto=[... horarioEnLista2,pretendienteHorario]
+				lista1.push(horarioPretendienteCompleto)
+			}
+			console.log('horarioEnLista2',JSON.stringify(horarioEnLista2),'pretendienteHorario',pretendienteHorario,'listaDeChoques',JSON.stringify(listaDeChoques),'lista1',JSON.stringify(lista1))
+		}
 	}
-	listafinal=[...listafinal,...listainicial];
-	return listafinal;
+	console.log('mediado de ciclo: lista1 ',JSON.stringify(lista1), 'lista2 ',JSON.stringify(lista2), 'lista3 ',JSON.stringify(lista3));
+	for (let i = 0; i < lista2.length; i++){lista3.push(lista2[i]);}
+	lista2=[];
+	for (let i = 0; i < lista1.length; i++){lista2.push(lista1[i]);}
+	lista1=[];
 }
-
-function tablegenerator(ids,materias){
-	etiquetas=ids.map(value=>materias[value]);
-	tabla1=document.createElement('table');
-	titular=document.getElementById("titularlista");
-	console.log(titular);
-	tabla1.appendChild(titular);
-	etiquetas.forEach(etiqueta=>tabla1.appendChild(etiqueta));
-	return tabla1;
+console.log('fin de ciclo: lista1 ',JSON.stringify(lista1), 'lista2 ',JSON.stringify(lista2), 'lista3 ',JSON.stringify(lista3));
+//crear la table de cada lista
+seccionRespuesta=document.getElementById("respuesta")
+seccionRespuesta.innerText=""
+titular=document.getElementById("titularlista")
+for(let iteradorHorarioValido=0;iteradorHorarioValido<lista3.length;iteradorHorarioValido++){
+	ppp=lista3.length-1-iteradorHorarioValido
+	horarioValido=lista3[ppp]
+	tabla=document.createElement('table')
+	tabla.appendChild(titular.cloneNode(true))
+	for(i=0;i<horarioValido.length;i++){tabla.appendChild(horarioLista[horarioValido[i]][2].cloneNode(true))}
+	seccionRespuesta.appendChild(tabla)
 }
+//console.log(matrizHorario);
+//console.log(horarioLista);
+//let rows=collectionList;
+//console.log((rows));
 
-function createTableFromRowIds(etiquetas,materias, options = {}) {
-	const rowIds=etiquetas.map(value=>'row'+materias[value]);
-	//console.log(rowIds);
-  // Default options
-  const {
-    originalTableId = null,
-    copyClasses = true,
-    includeHeader = true,
-    newTableId = 'filtered-table'
-  } = options;
-
-  // Create a new table element
-  const newTable = document.createElement('table');
-  newTable.id = newTableId;
-
-  // If an original table is specified, copy its classes and attributes
-  if (originalTableId) {
-    const originalTable = document.getElementById(originalTableId);
-    if (originalTable) {
-      if (copyClasses) {
-        newTable.className = originalTable.className;
-      }
-      // Copy other attributes (except ID)
-      Array.from(originalTable.attributes).forEach(attr => {
-        if (attr.name !== 'id') {
-          newTable.setAttribute(attr.name, attr.value);
-        }
-      });
-
-      // Copy the header if requested and exists
-      if (includeHeader) {
-        newTable.appendChild(document.getElementById("titularlista").cloneNode(true));
-      }
-    }
-  }
-
-  // Create table body
-  const tbody = document.createElement('tbody');
-  newTable.appendChild(tbody);
-
-  // Find and copy each requested row
-  
-  rowIds.forEach(id => {
-    const row = document.getElementById(id);
-	console.log(id, row);
-	//row && row.tagName == 'tr'
-    if (true) {
-      tbody.appendChild(row.cloneNode(true));
-    }
-  });
-
-  return newTable;
 }

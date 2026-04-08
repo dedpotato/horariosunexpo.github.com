@@ -93,8 +93,8 @@ function myFunction() {
                     listaNueva.push(intermediario1742);
                 }
             }
-            
-            if(condicional && elementolista.length>5){listaFinal.unshift(elementolista);}
+            tututu=max(0,maxChoque-3);
+            if(condicional && (elementolista.length>tututu)){listaFinal.unshift(elementolista);}
         }
         listaMedia=listaNueva;
         listaNueva=[];

@@ -80,12 +80,16 @@ function myFunction() {
         listaMedia.push([i]);
     }
     contador=0;
-    while(listaMedia.length>0&&contador<8){
+     //if(listaMedia.length > 0 && contador<8){console.log('lala',listaMedia.length);}
+    iteraciones=8;
+    while(listaMedia.length > 0 && contador<iteraciones){
+       
         for(iter1930=0;iter1930<listaMedia.length;iter1930++){
             condicional=true;
             elementolista=listaMedia[iter1930];
             for(candidato=0;candidato<elementolista[0];candidato++){
                 choques=calcularChoques(candidato,elementolista,tablaChoques);
+               
                 if(choques==0){
                     condicional=false;
                     intermediario1742=[...elementolista];
@@ -93,8 +97,10 @@ function myFunction() {
                     listaNueva.push(intermediario1742);
                 }
             }
-            tututu=(0>maxChoque-3)?0:maxChoque-3;
-            if(condicional && (elementolista.length>tututu)){listaFinal.unshift(elementolista);}
+            biff=(maxChoque < iteraciones)? maxChoque : iteraciones
+            tututu=(0>biff-3)?0:biff-3;
+            condicional=true;//(condicional && (elementolista.length>tututu))
+            if(elementolista.length>tututu){listaFinal.unshift(elementolista);}
         }
         listaMedia=listaNueva;
         listaNueva=[];
